@@ -160,36 +160,7 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
     //     (orientation == Orientation.landscape && screenHeight >= 600);
   }
 
-  Size getSizeApp(BuildContext context) {
-    var rateScreen = 16 / 9;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final orientation = MediaQuery.of(context).orientation;
-    if (screenHeight > screenWidth) {
-      var buffHeight = screenHeight;
-      var buffWidth = screenHeight / rateScreen;
-      if (buffWidth > screenWidth) {
-        buffHeight = screenWidth * rateScreen;
-      }
 
-      if (orientation == Orientation.portrait) {
-        return Size(buffWidth, buffHeight);
-      } else {
-        return Size(buffHeight, buffWidth);
-      }
-    } else {
-      var buffHeight = screenHeight;
-      var buffWidth = screenHeight / rateScreen;
-      if (buffWidth > screenWidth) {
-        buffHeight = screenWidth * rateScreen;
-      }
-      if (orientation == Orientation.portrait) {
-        return Size(buffWidth, buffHeight);
-      } else {
-        return Size(buffHeight, buffWidth);
-      }
-    }
-  }
 
   Future<void> _validateSize() async {
     if (widget.ensureScreenSize) return ScreenUtil.ensureScreenSize();
@@ -267,5 +238,35 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
   void dispose() {
     _binding.removeObserver(this);
     super.dispose();
+  }
+}
+Size getSizeApp(BuildContext context) {
+  var rateScreen = 16 / 9;
+  final screenWidth = MediaQuery.of(context).size.width;
+  final screenHeight = MediaQuery.of(context).size.height;
+  final orientation = MediaQuery.of(context).orientation;
+  if (screenHeight > screenWidth) {
+    var buffHeight = screenHeight;
+    var buffWidth = screenHeight / rateScreen;
+    if (buffWidth > screenWidth) {
+      buffHeight = screenWidth * rateScreen;
+    }
+
+    if (orientation == Orientation.portrait) {
+      return Size(buffWidth, buffHeight);
+    } else {
+      return Size(buffHeight, buffWidth);
+    }
+  } else {
+    var buffHeight = screenHeight;
+    var buffWidth = screenHeight / rateScreen;
+    if (buffWidth > screenWidth) {
+      buffHeight = screenWidth * rateScreen;
+    }
+    if (orientation == Orientation.portrait) {
+      return Size(buffWidth, buffHeight);
+    } else {
+      return Size(buffHeight, buffWidth);
+    }
   }
 }
