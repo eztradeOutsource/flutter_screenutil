@@ -224,7 +224,7 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
 }
 
 Size getSizeApp(BuildContext context) {
-  var rateScreen = 16 / 9;
+  var rateScreen = 812 / 375;
   final screenWidth = MediaQuery.of(context).size.width;
   final screenHeight = MediaQuery.of(context).size.height;
   final orientation = MediaQuery.of(context).orientation;
