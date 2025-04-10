@@ -230,7 +230,7 @@ Size getSizeApp(BuildContext context) {
   final orientation = MediaQuery.of(context).orientation;
   bool isMobile = defaultTargetPlatform == TargetPlatform.iOS ||
       ((defaultTargetPlatform != TargetPlatform.iOS) &&
-          !((orientation == Orientation.portrait && screenWidth >= 600) ||
+          !((orientation == Orientation.portrait && screenWidth >= 530) ||
               (orientation == Orientation.landscape && screenHeight >= 600)));
   if (isMobile) {
     return Size(screenWidth, screenHeight);
