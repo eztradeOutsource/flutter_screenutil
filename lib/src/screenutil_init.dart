@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import './_flutter_widgets.dart';
@@ -135,9 +137,58 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
   }
 
   MediaQueryData? _newData() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final orientation = MediaQuery.of(context).orientation;
     final view = View.maybeOf(context);
-    if (view != null) return MediaQueryData.fromView(view);
+    bool isMobile = defaultTargetPlatform == TargetPlatform.iOS ||
+        (!(orientation == Orientation.portrait && screenWidth >= 600) ||
+            !(orientation == Orientation.landscape && screenHeight >= 600));
+    if (!isMobile) {
+      if (view != null) {
+        return MediaQueryData.fromView(view).copyWith(size: getSizeApp(context));
+      }
+    } else {
+      if (view != null) {
+        return MediaQueryData.fromView(view);
+      }
+    }
     return null;
+
+    // TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android;
+    // bool isTablet = (orientation == Orientation.portrait && screenWidth >= 600) ||
+    //     (orientation == Orientation.landscape && screenHeight >= 600);
+  }
+
+  Size getSizeApp(BuildContext context) {
+    var rateScreen = 16 / 9;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final orientation = MediaQuery.of(context).orientation;
+    if (screenHeight > screenWidth) {
+      var buffHeight = screenHeight;
+      var buffWidth = screenHeight / rateScreen;
+      if (buffWidth > screenWidth) {
+        buffHeight = screenWidth * rateScreen;
+      }
+
+      if (orientation == Orientation.portrait) {
+        return Size(buffWidth, buffHeight);
+      } else {
+        return Size(buffHeight, buffWidth);
+      }
+    } else {
+      var buffHeight = screenHeight;
+      var buffWidth = screenHeight / rateScreen;
+      if (buffWidth > screenWidth) {
+        buffHeight = screenWidth * rateScreen;
+      }
+      if (orientation == Orientation.portrait) {
+        return Size(buffWidth, buffHeight);
+      } else {
+        return Size(buffHeight, buffWidth);
+      }
+    }
   }
 
   Future<void> _validateSize() async {
