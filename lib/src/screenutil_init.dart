@@ -137,30 +137,12 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
   }
 
   MediaQueryData? _newData() {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final orientation = MediaQuery.of(context).orientation;
     final view = View.maybeOf(context);
-    bool isMobile = defaultTargetPlatform == TargetPlatform.iOS ||
-        (!(orientation == Orientation.portrait && screenWidth >= 600) ||
-            !(orientation == Orientation.landscape && screenHeight >= 600));
-    if (!isMobile) {
-      if (view != null) {
-        return MediaQueryData.fromView(view).copyWith(size: getSizeApp(context));
-      }
-    } else {
-      if (view != null) {
-        return MediaQueryData.fromView(view);
-      }
+    if (view != null) {
+      return MediaQueryData.fromView(view).copyWith(size: getSizeApp(context));
     }
     return null;
-
-    // TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android;
-    // bool isTablet = (orientation == Orientation.portrait && screenWidth >= 600) ||
-    //     (orientation == Orientation.landscape && screenHeight >= 600);
   }
-
-
 
   Future<void> _validateSize() async {
     if (widget.ensureScreenSize) return ScreenUtil.ensureScreenSize();
@@ -240,23 +222,18 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
     super.dispose();
   }
 }
+
 Size getSizeApp(BuildContext context) {
   var rateScreen = 16 / 9;
   final screenWidth = MediaQuery.of(context).size.width;
   final screenHeight = MediaQuery.of(context).size.height;
   final orientation = MediaQuery.of(context).orientation;
-  if (screenHeight > screenWidth) {
-    var buffHeight = screenHeight;
-    var buffWidth = screenHeight / rateScreen;
-    if (buffWidth > screenWidth) {
-      buffHeight = screenWidth * rateScreen;
-    }
-
-    if (orientation == Orientation.portrait) {
-      return Size(buffWidth, buffHeight);
-    } else {
-      return Size(buffHeight, buffWidth);
-    }
+  bool isMobile = defaultTargetPlatform == TargetPlatform.iOS ||
+      ((defaultTargetPlatform != TargetPlatform.iOS) &&
+          !((orientation == Orientation.portrait && screenWidth >= 600) ||
+              (orientation == Orientation.landscape && screenHeight >= 600)));
+  if (isMobile) {
+    return Size(screenWidth, screenHeight);
   } else {
     var buffHeight = screenHeight;
     var buffWidth = screenHeight / rateScreen;
