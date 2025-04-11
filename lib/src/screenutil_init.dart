@@ -139,7 +139,7 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
   MediaQueryData? _newData() {
     final view = View.maybeOf(context);
     if (view != null) {
-      return MediaQueryData.fromView(view).copyWith(size: getSizeApp(context));
+      return MediaQueryData.fromView(view).copyWith(size: getSizeApp(context).sizeApp);
     }
     return null;
   }
@@ -223,7 +223,13 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
   }
 }
 
-Size getSizeApp(BuildContext context) {
+class DeviceSizeApp {
+  final bool isMobile;
+  final Size sizeApp;
+  DeviceSizeApp({required this.isMobile, required this.sizeApp});
+}
+
+DeviceSizeApp getSizeApp(BuildContext context) {
   var rateScreen = 812 / 375;
   final screenWidth = MediaQuery.of(context).size.width;
   final screenHeight = MediaQuery.of(context).size.height;
@@ -233,7 +239,7 @@ Size getSizeApp(BuildContext context) {
           !((orientation == Orientation.portrait && screenWidth >= 530) ||
               (orientation == Orientation.landscape && screenHeight >= 600)));
   if (isMobile) {
-    return Size(screenWidth, screenHeight);
+    return DeviceSizeApp(isMobile: isMobile, sizeApp: MediaQuery.of(context).size);
   } else {
     var buffHeight = screenHeight;
     var buffWidth = screenHeight / rateScreen;
@@ -241,9 +247,9 @@ Size getSizeApp(BuildContext context) {
       buffHeight = screenWidth * rateScreen;
     }
     if (orientation == Orientation.portrait) {
-      return Size(buffWidth, buffHeight);
+      return DeviceSizeApp(isMobile: isMobile, sizeApp: Size(buffWidth, buffHeight));
     } else {
-      return Size(buffHeight, buffWidth);
+      return DeviceSizeApp(isMobile: isMobile, sizeApp: Size(buffHeight, buffWidth));
     }
   }
 }
