@@ -10,6 +10,8 @@ import 'dart:ui' as ui show FlutterView;
 
 import 'package:flutter/widgets.dart';
 
+import '../flutter_screenutil.dart';
+
 typedef FontSizeResolver = double Function(num fontSize, ScreenUtil instance);
 
 class ScreenUtil {
@@ -157,7 +159,7 @@ class ScreenUtil {
   }) {
     final view = View.maybeOf(context);
     return configure(
-      data: view != null ? MediaQueryData.fromView(view) : null,
+      data: view != null ? MediaQueryData.fromView(view).copyWith(size: getSizeApp(context).sizeApp) : null,
       designSize: designSize,
       splitScreenMode: splitScreenMode,
       minTextAdapt: minTextAdapt,
