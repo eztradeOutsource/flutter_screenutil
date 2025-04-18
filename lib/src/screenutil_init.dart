@@ -234,10 +234,13 @@ DeviceSizeApp getSizeApp(BuildContext context) {
   final screenWidth = MediaQuery.of(context).size.width;
   final screenHeight = MediaQuery.of(context).size.height;
   final orientation = MediaQuery.of(context).orientation;
-  bool isMobile = defaultTargetPlatform == TargetPlatform.iOS ||
-      ((defaultTargetPlatform != TargetPlatform.iOS) &&
+  bool isMobile =
+      // defaultTargetPlatform == TargetPlatform.iOS ||
+      // ((defaultTargetPlatform != TargetPlatform.iOS) &&
           !((orientation == Orientation.portrait && screenWidth >= 530) ||
-              (orientation == Orientation.landscape && screenHeight >= 600)));
+              (orientation == Orientation.landscape && screenHeight >= 600))//)
+  ;
+  //isMobile = true;
   if (isMobile) {
     return DeviceSizeApp(isMobile: isMobile, sizeApp: MediaQuery.of(context).size);
   } else {
