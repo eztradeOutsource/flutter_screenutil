@@ -237,11 +237,18 @@ DeviceSizeApp getSizeApp(BuildContext context) {
   bool isMobile =
       // defaultTargetPlatform == TargetPlatform.iOS ||
       // ((defaultTargetPlatform != TargetPlatform.iOS) &&
-          !((orientation == Orientation.portrait && screenWidth >= 530) ||
-              (orientation == Orientation.landscape && screenHeight >= 600))//)
-  ;
+      !((orientation == Orientation.portrait && screenWidth >= 530) ||
+          (orientation == Orientation.landscape && screenHeight >= 600)) //)
+      ;
   //isMobile = true;
   if (isMobile) {
+    if (Platform.isIOS) {
+      bool is16by9 = (screenHeight / screenWidth - 16 / 9).abs() < 0.05;
+      if (is16by9) {
+        var buffScreenWidth = screenHeight / rateScreen;
+        return DeviceSizeApp(isMobile: isMobile, sizeApp: Size(buffScreenWidth, screenHeight));
+      }
+    }
     return DeviceSizeApp(isMobile: isMobile, sizeApp: MediaQuery.of(context).size);
   } else {
     var buffHeight = screenHeight;
