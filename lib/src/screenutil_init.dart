@@ -229,6 +229,7 @@ class DeviceSizeApp {
   DeviceSizeApp({required this.isMobile, required this.sizeApp});
 }
 
+bool? is16by9;
 DeviceSizeApp getSizeApp(BuildContext context) {
   var rateScreen = 812 / 375;
   final screenWidth = MediaQuery.of(context).size.width;
@@ -243,8 +244,8 @@ DeviceSizeApp getSizeApp(BuildContext context) {
   //isMobile = true;
   if (isMobile) {
     if (Platform.isIOS) {
-      bool is16by9 = (screenHeight / screenWidth - 16 / 9).abs() < 0.05;
-      if (is16by9) {
+      is16by9 ??= (screenHeight / screenWidth - 16 / 9).abs() < 0.05;
+      if (is16by9 ?? false) {
         var buffScreenWidth = screenHeight / rateScreen;
         return DeviceSizeApp(isMobile: isMobile, sizeApp: Size(buffScreenWidth, screenHeight));
       }
