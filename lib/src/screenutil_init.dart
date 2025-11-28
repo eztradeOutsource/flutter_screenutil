@@ -229,30 +229,51 @@ class DeviceSizeApp {
   DeviceSizeApp({required this.isMobile, required this.sizeApp});
 }
 
+// Cache kết quả tính toán kích thước ứng dụng
+bool? is16by9;
+DeviceSizeApp? landscapeSize;
+DeviceSizeApp? portraitSize;
+double rateScreen = 812 / 375;
+double? buffHeight;
+double? buffWidth;
+bool isFirstCalc = false;
 DeviceSizeApp getSizeApp(BuildContext context) {
-  var rateScreen = 812 / 375;
   final screenWidth = MediaQuery.of(context).size.width;
   final screenHeight = MediaQuery.of(context).size.height;
   final orientation = MediaQuery.of(context).orientation;
-  bool isMobile =
-      // defaultTargetPlatform == TargetPlatform.iOS ||
-      // ((defaultTargetPlatform != TargetPlatform.iOS) &&
-          !((orientation == Orientation.portrait && screenWidth >= 530) ||
-              (orientation == Orientation.landscape && screenHeight >= 600))//)
-  ;
-  //isMobile = true;
+  bool isMobile = !((orientation == Orientation.portrait && screenWidth >= 530) ||
+          (orientation == Orientation.landscape && screenHeight >= 600)) //)
+      ;
   if (isMobile) {
+    if (Platform.isIOS) {
+      is16by9 ??= (screenHeight / screenWidth - 16 / 9).abs() < 0.05;
+      if (is16by9 ?? false) {
+        /// tính toán đối với thiết bị chuẩn cũ
+        if (orientation == Orientation.portrait) {
+          portraitSize ??= DeviceSizeApp(isMobile: isMobile, sizeApp: Size(screenHeight / rateScreen, screenHeight));
+          return portraitSize!;
+        } else {
+          landscapeSize ??= DeviceSizeApp(isMobile: isMobile, sizeApp: Size(screenWidth, screenWidth / rateScreen));
+          return landscapeSize!;
+        }
+      }
+    }
     return DeviceSizeApp(isMobile: isMobile, sizeApp: MediaQuery.of(context).size);
   } else {
-    var buffHeight = screenHeight;
-    var buffWidth = screenHeight / rateScreen;
-    if (buffWidth > screenWidth) {
-      buffHeight = screenWidth * rateScreen;
+    if (!isFirstCalc) {
+      isFirstCalc = true;
+      buffHeight = screenHeight;
+      buffWidth = screenHeight / rateScreen;
+      if (buffWidth! > screenWidth) {
+        buffHeight = screenWidth * rateScreen;
+      }
     }
     if (orientation == Orientation.portrait) {
-      return DeviceSizeApp(isMobile: isMobile, sizeApp: Size(buffWidth, buffHeight));
+      portraitSize ??= DeviceSizeApp(isMobile: isMobile, sizeApp: Size(buffWidth!, buffHeight!));
+      return portraitSize!;
     } else {
-      return DeviceSizeApp(isMobile: isMobile, sizeApp: Size(buffHeight, buffWidth));
+      landscapeSize ??= DeviceSizeApp(isMobile: isMobile, sizeApp: Size(buffHeight!, buffWidth!));
+      return landscapeSize!;
     }
   }
 }
