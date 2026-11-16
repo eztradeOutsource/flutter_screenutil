@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
+import 'dart:math' show max, min;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import './_flutter_widgets.dart';
@@ -9,10 +12,8 @@ import 'screenutil_mixin.dart';
 
 typedef RebuildFactor = bool Function(MediaQueryData old, MediaQueryData data);
 
-typedef ScreenUtilInitBuilder = Widget Function(
-  BuildContext context,
-  Widget? child,
-);
+typedef ScreenUtilInitBuilder =
+    Widget Function(BuildContext context, Widget? child);
 
 abstract class RebuildFactors {
   static bool size(MediaQueryData old, MediaQueryData data) {
@@ -101,7 +102,8 @@ class ScreenUtilInit extends StatefulWidget {
   State<ScreenUtilInit> createState() => _ScreenUtilInitState();
 }
 
-class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObserver {
+class _ScreenUtilInitState extends State<ScreenUtilInit>
+    with WidgetsBindingObserver {
   final _canMarkedToBuild = HashSet<String>();
   final _excludedWidgets = HashSet<String>();
   MediaQueryData? _mediaQueryData;
@@ -114,7 +116,10 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
       _canMarkedToBuild.addAll(widget.responsiveWidgets!);
     }
 
-    ScreenUtil.enableScale(enableWH: widget.enableScaleWH, enableText: widget.enableScaleText);
+    ScreenUtil.enableScale(
+      enableWH: widget.enableScaleWH,
+      enableText: widget.enableScaleText,
+    );
 
     _validateSize().then(_screenSizeCompleter.complete);
 
@@ -136,7 +141,11 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
 
   MediaQueryData? _newData() {
     final view = View.maybeOf(context);
-    if (view != null) return MediaQueryData.fromView(view);
+    if (view != null) {
+      return MediaQueryData.fromView(
+        view,
+      ).copyWith(size: getSizeApp(context).sizeApp);
+    }
     return null;
   }
 
@@ -147,7 +156,8 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
   void _markNeedsBuildIfAllowed(Element el) {
     final widgetName = el.widget.runtimeType.toString();
     if (_excludedWidgets.contains(widgetName)) return;
-    final allowed = widget is SU ||
+    final allowed =
+        widget is SU ||
         _canMarkedToBuild.contains(widgetName) ||
         !(widgetName.startsWith('_') || flutterWidgets.contains(widgetName));
 
@@ -216,5 +226,81 @@ class _ScreenUtilInitState extends State<ScreenUtilInit> with WidgetsBindingObse
   void dispose() {
     _binding.removeObserver(this);
     super.dispose();
+  }
+}
+
+class DeviceSizeApp {
+  final bool isMobile;
+  final Size sizeApp;
+  DeviceSizeApp({required this.isMobile, required this.sizeApp});
+}
+
+// Cache kết quả tính toán kích thước ứng dụng
+bool? is16by9;
+DeviceSizeApp? landscapeSize;
+DeviceSizeApp? portraitSize;
+double rateScreen = 812 / 375;
+
+const double rate16by10 = 16 / 10;
+bool? is16by10;
+DeviceSizeApp? portraitSize16by10;
+DeviceSizeApp? landscapeSize16by10;
+DeviceSizeApp getSizeApp(BuildContext context) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  final screenHeight = MediaQuery.of(context).size.height;
+  final orientation = MediaQuery.of(context).orientation;
+  bool isMobile =
+      !((orientation == Orientation.portrait && screenWidth >= 530) ||
+          (orientation == Orientation.landscape && screenHeight >= 600)) //)
+      ;
+  if (isMobile) {
+    if (Platform.isIOS) {
+      is16by9 ??= (screenHeight / screenWidth - 16 / 9).abs() < 0.05;
+      if (is16by9 ?? false) {
+        /// tính toán đối với thiết bị chuẩn cũ
+        if (orientation == Orientation.portrait) {
+          portraitSize ??= DeviceSizeApp(
+            isMobile: isMobile,
+            sizeApp: Size(screenHeight / rateScreen, screenHeight),
+          );
+          return portraitSize!;
+        } else {
+          landscapeSize ??= DeviceSizeApp(
+            isMobile: isMobile,
+            sizeApp: Size(screenWidth, screenWidth / rateScreen),
+          );
+          return landscapeSize!;
+        }
+      }
+    }
+    is16by10 ??=
+        (max(screenWidth, screenHeight) / min(screenWidth, screenHeight) -
+                rate16by10)
+            .abs() <
+        0.08;
+    if (is16by10 ?? false) {
+      if (orientation == Orientation.portrait) {
+        portraitSize16by10 ??= DeviceSizeApp(
+          isMobile: isMobile,
+          sizeApp: Size(screenHeight / rateScreen, screenHeight),
+        );
+        return portraitSize16by10!;
+      } else {
+        landscapeSize16by10 ??= DeviceSizeApp(
+          isMobile: isMobile,
+          sizeApp: Size(screenWidth, screenWidth / rateScreen),
+        );
+        return landscapeSize16by10!;
+      }
+    }
+    return DeviceSizeApp(
+      isMobile: isMobile,
+      sizeApp: MediaQuery.of(context).size,
+    );
+  } else {
+    return DeviceSizeApp(
+      isMobile: isMobile,
+      sizeApp: Size(screenWidth, screenHeight),
+    );
   }
 }
